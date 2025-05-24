@@ -1,0 +1,105 @@
+/* Reset geral */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
+
+/* Página inteira */
+.page {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  padding: 0 20px; /* respiro lateral no mobile */
+  box-sizing: border-box;
+}
+
+/* Card de login */
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 40px 20px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch; /* <-- ESTICA os filhos, para o input seguir o tamanho do card */
+  box-sizing: border-box;
+}
+
+/* Título */
+.welcome {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+/* Inputs */
+.input-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid #eee;
+  background-color: #f9f9ff;
+  font-size: 16px;
+  outline: none;
+  box-sizing: border-box; /* <-- importantíssimo para não estourar */
+}
+
+.input-field:focus {
+  border: 2px solid #2196f3;
+  background-color: #ffffff;
+}
+
+/* Botão */
+.button-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.login-button {
+  padding: 12px 24px;
+  background-color: #2196f3;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.login-button:hover {
+  background-color: #1976d2;
+}
+
+/* Erro */
+.error-message {
+  color: red;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+  .page {
+    padding: 0;
+    background-color: #f0f0f0;
+  }
+}

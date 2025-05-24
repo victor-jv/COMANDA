@@ -1,0 +1,290 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  font-family: 'Inter', sans-serif;
+  background-color: #ffffff;
+}
+
+/* Container principal */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  position: relative;
+}
+
+/* Navegação Tabs */
+.navigation-tabs {
+  position: relative;
+  display: flex;
+  background-color: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 0 10px;
+  width: 100%;
+  height: 48px;
+  flex-shrink: 0;
+}
+
+.tab {
+  flex: 1;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease, font-size 0.3s ease;
+}
+
+.tab.active {
+  color: #2196f3;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+/* Linha azul animada */
+.active-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 33.3333%;
+  background-color: #2196f3;
+  border-radius: 2px;
+  transition: transform 0.3s ease;
+}
+
+/* Área de Conteúdo */
+.content-area {
+  flex: 1;
+  width: 100%;
+  background-color: #ffffff;
+  overflow-y: auto;
+}
+
+.content-text {
+  font-size: 18px;
+  color: #aaa;
+  text-align: center;
+  margin-top: 24px;
+}
+
+/* Grid 3 por linha */
+.comanda-grid-fixed {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 16px;
+  justify-items: center;
+}
+
+/* Box da comanda */
+.comanda-box-fixed {
+  background-color: #e6f4ec;
+  border: 2px solid #7aa388;
+  border-radius: 12px;
+  width: 80px;
+  height: 80px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #4a7c5a;
+  text-align: center;
+}
+
+/* Em andamento - Verde */
+.comanda-verde {
+  border-color: #4CAF50;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+/* Comandas abertas sem itens - Amarelo */
+.comanda-amarela {
+  border-color: #FFC107;
+  background-color: #fff8e1;
+  color: #ff8f00;
+}
+
+/* Finalizadas - Vermelho */
+.comanda-vermelha {
+  border-color: #F44336;
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* Número grande */
+.comanda-numero {
+  font-size: 20px;
+}
+
+/* Nome pequeno */
+.comanda-nome {
+  font-size: 12px;
+  margin-bottom: 4px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Botão excluir */
+.delete-comanda {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Botão adicionar */
+.add-button-fixed {
+  border: 2px dashed #4a7c5a;
+  background-color: #e6f4ec;
+  cursor: pointer;
+  font-size: 30px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  width: 90%;
+  max-width: 320px;
+  position: relative;
+}
+
+.close-modal {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px;
+  margin-top: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.login-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #4a7c5a;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* === NOVO: Categorias como pastas === */
+.folder-button {
+  background-color: #f0f8ff;
+  border: 2px solid #2196f3;
+  border-radius: 12px;
+  padding: 10px 16px;
+  margin: 16px;
+  width: calc(100% - 32px);
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.item-list {
+  padding: 8px 20px 16px;
+}
+
+.item-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 12px;
+}
+
+.item-details {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.item-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #000;
+}
+
+.item-price {
+  font-size: 14px;
+  font-weight: 500;
+  color: #444;
+  margin-top: 4px;
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+  .tab {
+    font-size: 16px;
+  }
+
+  .tab.active {
+    font-size: 19px;
+  }
+
+  .content-text {
+    font-size: 20px;
+  }
+}
+.item-list {
+  padding: 8px 20px;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  opacity: 1;
+  max-height: 1000px;
+}
+
+.item-list.hidden {
+  max-height: 0;
+  opacity: 0;
+  padding: 0 20px;
+}

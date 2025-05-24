@@ -1,0 +1,119 @@
+.resumo-container {
+  font-family: Arial, sans-serif;
+  max-width: 300px;
+  margin: 0 auto;
+  padding: 4px;
+  color: #000;
+  background: #fff;
+  line-height: 1.1;
+}
+
+.resumo-header {
+  display: none;
+}
+
+.resumo-subtitle {
+  text-align: center;
+  font-size: 11px;
+  font-weight: bold;
+  margin: 4px 0;
+}
+
+.resumo-box {
+  font-size: 10px;
+  margin-bottom: 4px;
+  border: 1px dashed #ccc;
+  padding: 4px;
+}
+
+.resumo-box p {
+  margin: 1px 0;
+}
+
+.resumo-tabela {
+  width: 100%;
+  font-size: 10px;
+  border-collapse: collapse;
+  margin-bottom: 4px;
+}
+
+.resumo-tabela th,
+.resumo-tabela td {
+  padding: 2px 0;
+  text-align: left;
+  border-bottom: 1px dashed #ccc;
+}
+
+.resumo-total-box {
+  font-size: 11px;
+  font-weight: bold;
+  text-align: right;
+  margin-top: 4px;
+  padding-top: 2px;
+  border-top: 1px solid #000;
+}
+
+.resumo-print,
+.resumo-voltar {
+  display: block;
+  width: 100%;
+  padding: 6px;
+  margin-top: 6px;
+  font-size: 11px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.resumo-print {
+  background-color: #4caf50;
+  color: white;
+}
+
+.resumo-voltar {
+  background-color: #777;
+  color: white;
+}
+
+/* ✅ Impressão limpa, compacta e sem rodapé do navegador */
+@media print {
+  html, body {
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .resumo-print,
+  .resumo-voltar,
+  .menu-icon,
+  .resumo-header {
+    display: none !important;
+  }
+
+  .resumo-container {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    max-height: 100%;
+    page-break-after: avoid;
+    page-break-before: avoid;
+  }
+
+  .resumo-subtitle,
+  .resumo-box,
+  .resumo-total-box {
+    margin: 2px 0;
+    padding: 0;
+  }
+
+  .resumo-tabela th,
+  .resumo-tabela td {
+    padding: 1px 0;
+    border: none;
+  }
+
+  .resumo-tabela {
+    margin: 4px 0;
+  }
+}
