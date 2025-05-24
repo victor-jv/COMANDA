@@ -98,22 +98,31 @@ html, body, #root {
   display: none;
 }
 
+/* Estilo para categoria e garçom - Box principal */
 .category-item {
-  background-color: #f9f9f9;
-  border: 1px solid #2196f3;
-  border-radius: 10px;
-  padding: 0 20px;
-  height: 70px;
+  background-color: #fff; /* Fundo branco como no exemplo */
+  border: 1px solid #e5e7eb; /* Borda cinza suave */
+  border-radius: 0.75rem; /* rounded-xl do Tailwind */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* shadow do Tailwind */
+  padding: 1rem; /* p-4 do Tailwind */
+  height: auto; /* Altura automática para se adaptar ao conteúdo */
+  min-height: 70px; /* Mínimo para manter a consistência */
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
   box-sizing: border-box;
-  margin-bottom: 12px;
+  margin-bottom: 1rem; /* gap-4 entre os itens do Tailwind */
   opacity: 0;
   transform: translateY(10px);
   animation: fadeInUp 0.4s forwards;
+  transition: all 0.3s ease; /* transition-all duration-300 */
 }
+
+.category-item:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); /* hover:shadow-md */
+}
+
 
 @keyframes fadeInUp {
   to {
@@ -125,32 +134,42 @@ html, body, #root {
 .category-name {
   font-size: 20px;
   font-weight: bold;
-  overflow: hidden;
+  flex-grow: 1;
   white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
+  margin-right: 1rem; /* Espaço entre o nome e os botões, correspondente ao gap-4 */
 }
 
 .category-actions {
   display: flex;
-  gap: 16px;
+  gap: 0.5rem; /* Espaçamento entre os ícones (gap-4 seria um pouco grande para 2 ícones) */
   align-items: center;
+  flex-shrink: 0;
 }
 
+/* Estilo para Itens - Box principal */
 .item-box {
-  background: #eeeeee;
-  border: 2px solid #2196f3;
-  border-radius: 20px;
+  background-color: #fff; /* Fundo branco como no exemplo */
+  border: 1px solid #e5e7eb; /* Borda cinza suave */
+  border-radius: 0.75rem; /* rounded-xl do Tailwind */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* shadow do Tailwind */
+  padding: 1rem; /* p-4 do Tailwind */
   display: flex;
   align-items: center;
-  padding: 7px 7px;
-  gap: 20px;
-  margin-bottom: 15px;
+  gap: 1rem; /* gap-4 do Tailwind */
+  margin-bottom: 1rem; /* gap-4 entre os itens do Tailwind */
   width: 100%;
   max-width: 500px;
   box-sizing: border-box;
   opacity: 0;
   transform: translateY(10px);
   animation: fadeInUp 0.4s forwards;
+  transition: all 0.3s ease; /* transition-all duration-300 */
+}
+
+.item-box:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); /* hover:shadow-md */
 }
 
 @keyframes fadeInUp {
@@ -161,51 +180,80 @@ html, body, #root {
 }
 
 .item-image {
-  width: 100px;
-  height: 100px;
+  width: 80px; /* Ajustado para se aproximar da imagem */
+  height: 80px; /* Ajustado para se aproximar da imagem */
   object-fit: cover;
-  border-radius: 15px;
+  border-radius: 0.5rem; /* Arredondamento da imagem dentro da box */
   flex-shrink: 0;
 }
 
 .item-details {
   font-family: 'Inter', sans-serif;
-  font-weight: 600;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
+  min-width: 0; /* Permite que o texto dentro encolha */
 }
-
 
 .item-name {
   font-family: 'Inter', sans-serif;
-  font-size: 25px;
-  font-weight: bold;
+  font-size: 1.25rem; /* Aproximado ao font-size do exemplo (20px) */
+  font-weight: 700; /* bold */
   color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  line-height: 1.2; /* Ajustar line-height para nomes maiores */
 }
 
 .item-price {
-  font-size: 17px;
+  font-size: 1rem; /* Aproximado ao font-size do exemplo (16px) */
   color: #666;
-  margin-top: 5px;
+  margin-top: 0.25rem; /* Pequeno espaçamento entre nome e preço */
+  font-weight: 500; /* medium */
 }
 
 .item-actions {
-  margin-top: 4rem;
   display: flex;
+  flex-shrink: 0;
+  gap: 0.5rem; /* Espaçamento entre os botões de ação */
+  align-self: center; /* Alinha verticalmente no centro do item-box */
 }
 
 .icon-button {
-  background: none;
-  border: none;
+  background-color: #f3f4f6; /* Cor de fundo suave para os botões */
+  border: 1px solid #d1d5db; /* Borda suave */
+  border-radius: 0.5rem; /* Arredondamento dos botões */
+  width: 40px; /* Largura fixa */
+  height: 40px; /* Altura fixa */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Cores específicas dos botões de editar e apagar para replicar o exemplo */
+.icon-button.edit {
+    border-color: #86efac; /* Verde suave */
+    background-color: #dcfce7; /* Fundo verde muito suave */
+}
+
+.icon-button.delete {
+    border-color: #fca5a5; /* Vermelho suave */
+    background-color: #fee2e2; /* Fundo vermelho muito suave */
+}
+
+.icon-button:hover {
+  background-color: #e5e7eb; /* Fundo mais escuro ao passar o mouse */
 }
 
 .icon-button img {
-  width: 32px;
-  height: 32px;
+  width: 20px; /* Tamanho dos ícones ajustado ao tamanho dos botões */
+  height: 20px;
 }
 
 /* Botão adicionar (+) */
