@@ -78,42 +78,110 @@
 /* ✅ Impressão limpa, compacta e sem rodapé do navegador */
 @media print {
   html, body {
-    height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
+    height: auto !important;
+    overflow: visible !important;
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    /* ✅ Adicionado: Define a largura da página para o que o conteúdo precisa */
+    width: auto !important; 
+    min-width: 0 !important;
+    max-width: none !important;
   }
 
   .resumo-print,
   .resumo-voltar,
   .menu-icon,
-  .resumo-header {
+  .resumo-header,
+  .top-bar,
+  .drawer,
+  .navbar-global,
+  .comanda-footer,
+  .notification-message {
     display: none !important;
   }
 
   .resumo-container {
-    width: 100%;
+    width: 100%; /* Continua ocupando a largura total do papel disponível */
     padding: 0;
     margin: 0;
-    max-height: 100%;
+    max-width: none;
+    box-shadow: none;
+    background-color: #fff !important;
+    color: #000 !important;
     page-break-after: avoid;
     page-break-before: avoid;
+    float: none !important;
+    position: static !important;
+    /* ✅ Adicionado: Garante que o container se ajuste ao conteúdo na altura */
+    height: auto !important; 
+    min-height: 0 !important;
+    display: block !important; /* Assegura que o container seja um bloco para quebrar */
   }
 
-  .resumo-subtitle,
+  /* Ajustes finos para a legibilidade do texto na impressão */
+  .resumo-subtitle {
+    font-size: 14px;
+    margin-bottom: 8px;
+    padding-top: 10px;
+  }
+
   .resumo-box,
   .resumo-total-box {
-    margin: 2px 0;
-    padding: 0;
+    font-size: 12px;
+    margin-bottom: 8px;
+    padding: 5px;
+    border: 1px dashed #999;
+  }
+  .resumo-total-box {
+      border-top: 1px solid #000 !important;
+      padding-top: 5px;
+  }
+
+  .resumo-tabela {
+    font-size: 12px;
+    margin-bottom: 8px;
   }
 
   .resumo-tabela th,
   .resumo-tabela td {
-    padding: 1px 0;
-    border: none;
+    padding: 4px 0;
+    border-bottom: 1px dashed #999;
   }
 
-  .resumo-tabela {
-    margin: 4px 0;
+  .resumo-tabela thead th {
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #333;
+  }
+
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  button, select, input, div {
+      background-color: transparent !important;
+      box-shadow: none !important;
+      border-color: #ccc !important;
+  }
+
+  /* ✅ Adicionado: Quebras de página forçadas para elementos específicos */
+  /* Seções maiores podem ter uma quebra antes, mas o ideal é deixar o conteúdo fluir */
+  .resumo-box, .resumo-tabela, .resumo-total-box {
+    page-break-inside: avoid; /* Evita quebra dentro destes blocos */
+  }
+
+  /* ✅ Adicionado: Ajustes para o tamanho do papel, se necessário */
+  /* @page {
+    size: auto; // ou 'A4 landscape', 'letter', etc.
+    margin: 10mm; // Margens mínimas para o conteúdo
+  } */
+  
+  /* Para navegadores baseados em WebKit (Chrome, Safari) */
+  body::-webkit-scrollbar {
+    display: none; /* Ocultar barras de rolagem */
   }
 }

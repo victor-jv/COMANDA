@@ -9,13 +9,16 @@ function ResumoPage() {
 
   if (!state) return <p>Dados da comanda não encontrados.</p>;
 
-  const { numero, nome, pedido, total, dataAbertura } = state;
+  // ✅ Extrai numero_sequencial do state da navegação
+  const { numero, nome, pedido, total, dataAbertura, numero_sequencial } = state;
 
   const finalizarComanda = async () => {
     try {
-      // Atualiza a comanda no Firebase para "fechada"
+      // ✅ Salva o total e a dataAbertura (o backend espera o ID longo para o PUT)
       await axios.put(`https://backendcmd.onrender.com/comandas/${numero}`, {
         status: 'fechada',
+        total: total,
+        dataAbertura: dataAbertura,
       });
       navigate('/home');
     } catch (error) {
@@ -33,9 +36,18 @@ function ResumoPage() {
       <h3 className="resumo-subtitle">RESUMO DA MESA</h3>
 
       <div className="resumo-box">
-        <p><strong>Mesa:</strong> {String(numero).padStart(2, '0')}</p>
+        {/* ✅ Exibe "Comanda" e o numero_sequencial formatado */}
+        <p><strong>Comanda:</strong> {String(numero_sequencial || 'ERR').padStart(2, '0')}</p>
         <p><strong>Status:</strong> Fechada</p>
-        <p><strong>Data de Abertura:</strong> {dataAbertura}</p>
+        <p><strong>Data de Abertura:</strong> {new Date(dataAbertura).toLocaleDateString('pt-BR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZone: 'America/Sao_Paulo'
+          })}</p>
       </div>
 
       <table className="resumo-tabela">

@@ -3,18 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './HomePage.css';
 
-function HomePage() {
+function HomePage({ setNotificationMessage }) {
   const [activeTab, setActiveTab] = useState('Em andamento');
   const [linePosition, setLinePosition] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [comandas, setComandas] = useState([]);
-  const [novoNome, setNovoNome] = useState('');
+  const [novoNome, setNewNome] = useState('');
   const [itens, setItens] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [categoriaAberta, setCategoriaAberta] = useState(null);
   const [confirmDeleteAll, setConfirmDeleteAll] = useState(false);
   const [confirmDeleteSingle, setConfirmDeleteSingle] = useState(null);
-  const [notificacaoComandaCriada, setNotificacaoComandaCriada] = useState('');
 
   const navigate = useNavigate();
   const tabs = ['Em andamento', 'Comandas', 'Finalizadas', 'Cardápio'];
@@ -67,9 +66,8 @@ function HomePage() {
     try {
       await axios.post('https://backendcmd.onrender.com/comandas', comandaData);
       setModalOpen(false);
-      setNovoNome('');
-      setNotificacaoComandaCriada(comandaData.nome);
-      setTimeout(() => setNotificacaoComandaCriada(''), 3000);
+      setNewNome('');
+      setNotificationMessage(`✅ Comanda ${comandaData.nome} criada com sucesso!`);
     } catch (err) {
       console.error('Erro ao salvar no Firebase:', err);
     }
@@ -104,7 +102,6 @@ function HomePage() {
 
   const renderComandaBox = (comanda, index, colorClass = '') => (
     <div
-      key={comanda.numero}
       className={`comanda-box-fixed ${colorClass}`}
       onClick={() => navigate(`/comanda/${comanda.numero}`)}
     >
@@ -148,7 +145,11 @@ function HomePage() {
           <div className="comanda-grid-fixed">
             {comandas
               .filter((c) => c.status === 'aberta' && c.itens && c.itens.length > 0)
-              .map((comanda, index) => renderComandaBox(comanda, index, 'comanda-verde'))}
+              .map((comanda, index) => (
+                <div key={comanda.numero}>
+                  {renderComandaBox(comanda, index, 'comanda-verde')}
+                </div>
+              ))}
           </div>
         )}
 
@@ -156,7 +157,11 @@ function HomePage() {
           <div className="comanda-grid-fixed">
             {comandas
               .filter((c) => c.status === 'aberta' && (!c.itens || c.itens.length === 0))
-              .map((comanda, index) => renderComandaBox(comanda, index, 'comanda-amarela'))}
+              .map((comanda, index) => (
+                <div key={comanda.numero}>
+                  {renderComandaBox(comanda, index, 'comanda-amarela')}
+                </div>
+              ))}
             <div
               className="comanda-box-fixed add-button-fixed"
               onClick={() => setModalOpen(true)}
@@ -167,16 +172,20 @@ function HomePage() {
         )}
 
         {activeTab === 'Finalizadas' && (
-          <>
+          <div>
             <button className="login-button" onClick={() => setConfirmDeleteAll(true)}>
               Apagar todas as finalizadas
             </button>
             <div className="comanda-grid-fixed">
               {comandas
                 .filter((c) => c.status === 'fechada')
-                .map((comanda, index) => renderComandaBox(comanda, index, 'comanda-vermelha'))}
+                .map((comanda, index) => (
+                  <div key={comanda.numero}>
+                    {renderComandaBox(comanda, index, 'comanda-vermelha')}
+                  </div>
+                ))}
             </div>
-          </>
+          </div>
         )}
 
         {activeTab === 'Cardápio' && (
@@ -206,7 +215,6 @@ function HomePage() {
         )}
       </div>
 
-      {/* Modal Nova Comanda */}
       {modalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -217,21 +225,13 @@ function HomePage() {
               className="input-field"
               placeholder="Nome do cliente"
               value={novoNome}
-              onChange={(e) => setNovoNome(e.target.value)}
+              onChange={(e) => setNewNome(e.target.value)}
             />
             <button className="login-button" onClick={salvarComanda}>Salvar</button>
           </div>
         </div>
       )}
 
-      {/* Notificação Comanda Criada */}
-      {notificacaoComandaCriada && (
-        <div className="notificacao-comanda-criada">
-          ✅ Comanda criada: {notificacaoComandaCriada}
-        </div>
-      )}
-
-      {/* Confirmação excluir uma comanda */}
       {confirmDeleteSingle && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -247,7 +247,6 @@ function HomePage() {
         </div>
       )}
 
-      {/* Confirmação excluir todas as finalizadas */}
       {confirmDeleteAll && (
         <div className="modal-overlay">
           <div className="modal-content">

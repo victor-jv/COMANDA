@@ -69,3 +69,39 @@
     cursor: pointer;
   }
   
+/* ✅ Estilos para a Notificação */
+.notification-message {
+  position: fixed;
+  top: 65px; /* Abaixo da top-bar */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4CAF50; /* Verde para sucesso */
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  z-index: 1100; /* Acima da top-bar */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.5s ease-out forwards, fadeOut 0.5s ease-in 2.5s forwards; /* Animação de entrada e saída */
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-50%) translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

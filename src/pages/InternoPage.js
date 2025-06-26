@@ -241,10 +241,10 @@ if (activeTab === 'Garçons' && newItem.trim() === '') {
                 <div key={index} className="category-item">
                   <span className="category-name">{category.name}</span>
                   <div className="category-actions">
-                    <button className="icon-button edit" onClick={() => handleEditItem(index)}>
+                    <button className="icon-button" onClick={() => handleEditItem(index)}>
                       <img src={editIcon} alt="Editar" />
                     </button>
-                    <button className="icon-button delete" onClick={() => askDeleteItem(index)}>
+                    <button className="icon-button" onClick={() => askDeleteItem(index)}>
                       <img src={trashIcon} alt="Excluir" />
                     </button>
                   </div>
@@ -293,10 +293,10 @@ if (activeTab === 'Garçons' && newItem.trim() === '') {
                 <div key={index} className="category-item">
                   <span className="category-name">{garcom.nome}</span>
                   <div className="category-actions">
-                    <button className="icon-button edit" onClick={() => handleEditItem(index)}>
+                    <button className="icon-button" onClick={() => handleEditItem(index)}>
                       <img src={editIcon} alt="Editar" />
                     </button>
-                    <button className="icon-button delete" onClick={() => askDeleteItem(index)}>
+                    <button className="icon-button" onClick={() => askDeleteItem(index)}>
                       <img src={trashIcon} alt="Excluir" />
                     </button>
                   </div>

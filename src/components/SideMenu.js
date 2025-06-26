@@ -2,9 +2,22 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SideMenu.css';
 
-function SideMenu() {
+// Recebemos `user` e `onLogout` como props do App.js
+function SideMenu({ user, onLogout }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  // Função para lidar com a navegação e fechar o menu
+  const handleNavigate = (path) => {
+    navigate(path);
+    setMenuOpen(false);
+  };
+
+  // Função para lidar com o logout
+  const handleLogoutClick = () => {
+    onLogout();
+    setMenuOpen(false);
+  };
 
   return (
     <>
@@ -16,13 +29,26 @@ function SideMenu() {
 
       <div className={`drawer ${menuOpen ? 'open' : ''}`}>
         <button className="close-icon" onClick={() => setMenuOpen(false)}>✖</button>
-        <button className="drawer-item" onClick={() => { navigate('/home'); setMenuOpen(false); }}>
+
+        {/* --- Itens de Menu --- */}
+        <button className="drawer-item" onClick={() => handleNavigate('/home')}>
           Início
         </button>
-        <button className="drawer-item" onClick={() => { navigate('/interno'); setMenuOpen(false); }}>
-          Sistema Interno
-        </button>
-        <button className="drawer-item" onClick={() => window.location.reload()}>
+
+        {/* ✨ MÁGICA ACONTECENDO AQUI ✨ */}
+        {/* Mostra os botões somente se a função do usuário for 'admin' */}
+        {user && user.role === 'admin' && (
+          <>
+            <button className="drawer-item" onClick={() => handleNavigate('/interno')}>
+              Sistema Interno
+            </button>
+            <button className="drawer-item" onClick={() => handleNavigate('/relatorios')}>
+              Relatórios
+            </button>
+          </>
+        )}
+
+        <button className="drawer-item" onClick={handleLogoutClick}>
           Sair
         </button>
       </div>

@@ -1,70 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
 import InternoPage from './pages/InternoPage';
 import ComandaPage from './pages/ComandaPage';
-import ResumoPage from './pages/ResumoPage'; // ✅ nova página de resumo
+import ResumoPage from './pages/ResumoPage';
+import RelatorioPage from './pages/RelatorioPage';
 import SideMenu from './components/SideMenu';
 import './App.css';
 
+// Componente para proteger rotas que exigem login
+const ProtectedRoute = ({ user, children }) => {
+  if (!user) return <Navigate to="/" replace />;
+  return children;
+};
+
+// Componente para proteger rotas que exigem permissão de Admin
+const AdminRoute = ({ user, children }) => {
+  if (!user || user.role !== 'admin') return <Navigate to="/home" replace />;
+  return children;
+};
+
 function App() {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+  const [notificationMessage, setNotificationMessage] = useState('');
+
+  useEffect(() => {
+    // Ao carregar o app, verifica se há um usuário salvo no armazenamento local
+    const userString = localStorage.getItem('user');
+    if (userString) {
+      setCurrentUser(JSON.parse(userString));
+    }
+    setLoadingUser(false);
+  }, []);
+
+  const handleLogin = (userData) => {
+    // Salva o token e os dados do usuário no armazenamento local
+    localStorage.setItem('token', userData.token);
+    localStorage.setItem('user', JSON.stringify(userData.user));
+    // Atualiza o estado da aplicação
+    setCurrentUser(userData.user);
+  };
+
+  const handleLogout = () => {
+    // Limpa o armazenamento local e o estado
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setCurrentUser(null);
+  };
+  
+  if (loadingUser) {
+    return <div>Carregando...</div>;
+  }
 
   return (
     <div className="App">
       <Router>
-        {loggedIn && <SideMenu />}
+        {currentUser && <SideMenu user={currentUser} onLogout={handleLogout} notificationMessage={notificationMessage} setNotificationMessage={setNotificationMessage} />}
         <Routes>
-          {/* Login */}
-          <Route 
-            path="/" 
-            element={
-              loggedIn 
-                ? <Navigate to="/home" /> 
-                : <LoginPage onLogin={() => setLoggedIn(true)} />
-            } 
-          />
+          <Route path="/" element={!currentUser ? <LoginPage onLoginSuccess={handleLogin} /> : <Navigate to="/home" />} />
+          
+          <Route path="/home" element={<ProtectedRoute user={currentUser}><HomePage setNotificationMessage={setNotificationMessage} /></ProtectedRoute>} />
+          <Route path="/comanda/:numero" element={<ProtectedRoute user={currentUser}><ComandaPage /></ProtectedRoute>} />
+          <Route path="/resumo" element={<ProtectedRoute user={currentUser}><ResumoPage /></ProtectedRoute>} />
 
-          {/* Página inicial após login */}
-          <Route 
-            path="/home" 
-            element={
-              loggedIn 
-                ? <HomePage /> 
-                : <Navigate to="/" />
-            } 
-          />
-
-          {/* Página interna */}
-          <Route 
-            path="/interno" 
-            element={
-              loggedIn 
-                ? <InternoPage /> 
-                : <Navigate to="/" />
-            } 
-          />
-
-          {/* Página da comanda */}
-          <Route 
-            path="/comanda/:numero" 
-            element={
-              loggedIn 
-                ? <ComandaPage /> 
-                : <Navigate to="/" />
-            } 
-          />
-
-          {/* ✅ Página de resumo da comanda */}
-          <Route 
-            path="/resumo" 
-            element={
-              loggedIn 
-                ? <ResumoPage /> 
-                : <Navigate to="/" />
-            } 
-          />
+          {/* Rotas de Admin */}
+          <Route path="/interno" element={<AdminRoute user={currentUser}><InternoPage /></AdminRoute>} />
+          <Route path="/relatorios" element={<AdminRoute user={currentUser}><RelatorioPage /></AdminRoute>} />
         </Routes>
       </Router>
     </div>

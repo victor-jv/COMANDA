@@ -1,27 +1,69 @@
 import React, { useState } from 'react';
 import './LoginPage.css';
 
-const LoginPage = ({ onLogin }) => {
+// --- INÍCIO DA LÓGICA DE AUTENTICAÇÃO ---
+
+// Lista de usuários autorizados. No futuro, isso pode vir de um banco de dados.
+const usuariosAutorizados = [
+  // Usuário Administrador
+  { email: 'admin@email.com', senha: 'admin123', role: 'admin' },
+
+  // Usuários Garçons
+  { email: 'garcom1@email.com', senha: 'garcom1', role: 'garcom' },
+  { email: 'garcom2@email.com', senha: 'garcom2', role: 'garcom' },
+  { email: 'garcom3@email.com', senha: 'garcom3', role: 'garcom' },
+  { email: 'garcom4@email.com', senha: 'garcom4', role: 'garcom' },
+  { email: 'garcom5@email.com', senha: 'garcom5', role: 'garcom' },
+];
+
+/**
+ * Função que simula a autenticação de um usuário.
+ * @param {string} email - O email para autenticar.
+ * @param {string} senha - A senha para autenticar.
+ * @returns {object|null} O objeto do usuário se for válido, senão null.
+ */
+const autenticarUsuario = (email, senha) => {
+  const usuarioEncontrado = usuariosAutorizados.find(
+    (user) => user.email === email && user.senha === senha
+  );
+
+  // Se encontrou, retorna um objeto com os dados essenciais do usuário.
+  // Não é uma boa prática retornar a senha.
+  if (usuarioEncontrado) {
+    return {
+      email: usuarioEncontrado.email,
+      role: usuarioEncontrado.role,
+    };
+  }
+
+  // Se não encontrou, retorna null.
+  return null;
+};
+
+// --- FIM DA LÓGICA DE AUTENTICAÇÃO ---
+
+
+const LoginPage = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
 
-  const usuariosAutorizados = [
-    { email: 'cliente1@teste.com', senha: '123456' },
-    { email: 'cliente2@teste.com', senha: 'abcdef' },
-    { email: 'cliente3@teste.com', senha: 'senha123' },
-  ];
-
   const handleLogin = () => {
-    const usuarioEncontrado = usuariosAutorizados.find(
-      (usuario) => usuario.email === email && usuario.senha === senha
-    );
+    setErro(''); // Limpa erros anteriores
 
-    if (usuarioEncontrado) {
-      onLogin();
+    // Verifica as credenciais usando nossa função de autenticação
+    const usuarioValidado = autenticarUsuario(email, senha);
+
+    if (usuarioValidado) {
+      // Se o usuário for válido, chama a função onLoginSuccess
+      // que foi passada pelo App.js, enviando os dados do usuário.
+      onLoginSuccess({
+        token: 'fake-jwt-token', // Em um app real, o backend geraria um token
+        user: usuarioValidado,
+      });
     } else {
-      setErro('Usuário ou senha inválidos');
-      onLogin();
+      // Se as credenciais estiverem incorretas, exibe uma mensagem de erro.
+      setErro('E-mail ou senha inválidos.');
     }
   };
 
@@ -32,7 +74,7 @@ const LoginPage = ({ onLogin }) => {
         <div className="input-container">
           <input
             type="email"
-            placeholder="Usuário"
+            placeholder="E-mail"
             className="input-field"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -43,11 +85,12 @@ const LoginPage = ({ onLogin }) => {
             className="input-field"
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleLogin()} // Permite fazer login com a tecla Enter
           />
           {erro && <p className="error-message">{erro}</p>}
           <div className="button-container">
             <button className="login-button" onClick={handleLogin}>
-              Login
+              Entrar
             </button>
           </div>
         </div>
