@@ -6,14 +6,14 @@ import './LoginPage.css';
 // Lista de usuários autorizados. No futuro, isso pode vir de um banco de dados.
 const usuariosAutorizados = [
   // Usuário Administrador
-  { email: 'admin@email.com', senha: 'admin123', role: 'admin' },
+  { email: 'admin@email.com', senha: 'admin123', role: 'admin', nome: 'Admin' },
 
   // Usuários Garçons
-  { email: 'garcom1@email.com', senha: 'garcom1', role: 'garcom' },
-  { email: 'garcom2@email.com', senha: 'garcom2', role: 'garcom' },
-  { email: 'garcom3@email.com', senha: 'garcom3', role: 'garcom' },
-  { email: 'garcom4@email.com', senha: 'garcom4', role: 'garcom' },
-  { email: 'garcom5@email.com', senha: 'garcom5', role: 'garcom' },
+  { email: 'garcom1@email.com', senha: 'garcom1', role: 'garcom', nome: 'garcom1' },
+  { email: 'garcom2@email.com', senha: 'garcom2', role: 'garcom', nome: 'garcom2' },
+  { email: 'garcom3@email.com', senha: 'garcom3', role: 'garcom', nome: 'garcom3' },
+  { email: 'garcom4@email.com', senha: 'garcom4', role: 'garcom', nome: 'garcom4' },
+  { email: 'garcom5@email.com', senha: 'garcom5', role: 'garcom', nome: 'garcom5' },
 ];
 
 /**
@@ -33,6 +33,7 @@ const autenticarUsuario = (email, senha) => {
     return {
       email: usuarioEncontrado.email,
       role: usuarioEncontrado.role,
+      nome: usuarioEncontrado.nome, // Adicionamos o nome ao objeto do usuário
     };
   }
 

@@ -3,21 +3,23 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './ComandaPage.css';
 
-function ComandaPage() {
-  const { numero } = useParams(); // 'numero' é o ID do Firebase (o ID longo)
+// A função agora recebe a prop 'user' que contém os dados do garçom logado.
+function ComandaPage({ user }) {
+  const { numero } = useParams(); // 'numero' é o ID da comanda.
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('Pedidos da comanda');
-  const [nomeCliente, setNomeCliente] = useState(''); // Estado para o nome do cliente
+  const [nomeCliente, setNomeCliente] = useState(''); // Estado para o nome do cliente.
   const [itensDisponiveis, setItensDisponiveis] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [categoriaAberta, setCategoriaAberta] = useState(null);
   const [pedido, setPedido] = useState({});
-  const [comandaSequencial, setComandaSequencial] = useState(''); // Estado para o número da comanda (exibição)
+  const [comandaSequencial, setComandaSequencial] = useState(''); // Estado para o número de exibição.
   const tabs = ['Pedidos da comanda', 'Cardápio'];
 
   useEffect(() => {
     carregarDados();
+    // Atualiza os dados da comanda a cada 2 segundos para manter a sincronia.
     const intervalo = setInterval(carregarDados, 2000);
     return () => clearInterval(intervalo);
   }, [numero]);
@@ -33,25 +35,23 @@ function ComandaPage() {
       setItensDisponiveis(itensRes.data);
       setCategorias(categoriasRes.data);
 
-      // ✅ Altera para buscar por 'c.numero' para corresponder ao backend
-      const comanda = comandasRes.data.find((c) => c.numero === numero); 
+      const comanda = comandasRes.data.find((c) => c.numero === numero);
       if (comanda) {
-        setNomeCliente(comanda.nome); // Define o nome do cliente
-        // ✅ Usa comanda.numero (o ID do Firebase) para o número de exibição
-        setComandaSequencial(comanda.numero); 
+        setNomeCliente(comanda.nome); // Define o nome do cliente.
+        setComandaSequencial(comanda.numero); // Define o ID para exibição.
         const pedidoConvertido = {};
         (comanda.itens || []).forEach((item) => {
           pedidoConvertido[item.id] = item.qtd;
         });
         setPedido(pedidoConvertido);
       } else {
-        // Se a comanda não for encontrada, exibe um aviso e redireciona para a home
+        // Se a comanda não for encontrada, redireciona para a página inicial.
         console.warn(`Comanda com ID '${numero}' não encontrada. Redirecionando para /home.`);
-        navigate('/home'); 
+        navigate('/home');
       }
     } catch (err) {
       console.error('Erro ao carregar dados:', err);
-      // Se houver um erro na requisição (ex: rede), também redireciona para evitar tela em branco
+      // Redireciona em caso de erro de rede para evitar uma tela em branco.
       navigate('/home');
     }
   };
@@ -59,20 +59,24 @@ function ComandaPage() {
   const alterarQtd = (itemId, delta) => {
     setPedido((prev) => {
       const atual = prev[itemId] || 0;
-      const novo = Math.max(atual + delta, 0);
+      const novo = Math.max(atual + delta, 0); // Garante que a quantidade não seja negativa.
       const atualizado = { ...prev };
-      if (novo === 0) delete atualizado[itemId];
-      else atualizado[itemId] = novo;
 
-      // 'pedidoFirebase' está definido aqui no seu código atual
+      if (novo === 0) {
+        delete atualizado[itemId];
+      } else {
+        atualizado[itemId] = novo;
+      }
+
+      // Prepara os dados para serem enviados ao backend.
       const pedidoFirebase = Object.entries(atualizado).map(([id, qtd]) => {
         const item = itensDisponiveis.find((i) => i.id === id);
         return { id, name: item?.name || '', qtd };
       });
 
-
+      // Atualiza os itens da comanda no backend.
       axios
-        .put(`https://backendcmd.onrender.com/comandas/${numero}/itens`, { 
+        .put(`https://backendcmd.onrender.com/comandas/${numero}/itens`, {
           itens: pedidoFirebase,
         })
         .catch((err) => console.error('Erro ao salvar itens da comanda:', err));
@@ -81,12 +85,16 @@ function ComandaPage() {
     });
   };
 
+  // Calcula o valor total do pedido.
   const total = Object.entries(pedido).reduce((acc, [id, qtd]) => {
     const item = itensDisponiveis.find((i) => i.id === id);
     if (!item) return acc;
-    return acc + qtd * parseFloat(item.price.replace(',', '.'));
+    // Converte o preço para número, substituindo vírgula por ponto.
+    const price = parseFloat(String(item.price).replace(',', '.'));
+    return acc + qtd * price;
   }, 0);
 
+  // Navega para a página de resumo, enviando os dados necessários.
   const finalizarPedido = () => {
     const dataAtualUTC = new Date().toISOString();
     const pedidoFinal = Object.entries(pedido).map(([id, qtd]) => {
@@ -96,12 +104,13 @@ function ComandaPage() {
 
     navigate('/resumo', {
       state: {
-        numero: numero, 
+        numero: numero,
         nome: nomeCliente,
         total,
         dataAbertura: dataAtualUTC,
         pedido: pedidoFinal,
-        // 'numero_sequencial' não é fornecido pelo backend na base atual, então não o passamos
+        // Adiciona o nome do garçom, que veio da prop 'user'.
+        garcom: user.nome,
       },
     });
   };
@@ -133,8 +142,8 @@ function ComandaPage() {
       </div>
 
       <h3 className="comanda-title">
-        {/* Exibe "COMANDA", o número (ID do Firebase) e o nome do cliente */}
-        COMANDA {String(comandaSequencial).padStart(2, '0')} — {nomeCliente} 
+        {/* Exibe o número da comanda e o nome do cliente. */}
+        COMANDA {String(comandaSequencial).padStart(2, '0')} — {nomeCliente}
       </h3>
 
       <div className="comanda-content">
@@ -144,6 +153,8 @@ function ComandaPage() {
           ) : (
             Object.entries(pedido).map(([id, qtd]) => {
               const item = itensDisponiveis.find((i) => i.id === id);
+              // Adicionado para evitar erro caso o item seja removido do sistema.
+              if (!item) return null; 
               return (
                 <div key={id} className="comanda-card-img">
                   <img src={item?.image || 'https://via.placeholder.com/50'} alt={item?.name} className="comanda-img" />
@@ -164,14 +175,14 @@ function ComandaPage() {
           categorias.map((categoria) => (
             <div key={categoria.id}>
               <button
-                className="folder-button"
+                className="folder-button" // Esta classe deve existir no seu CSS
                 onClick={() => setCategoriaAberta(categoriaAberta === categoria.id ? null : categoria.id)}
               >
                 {categoria.name} {categoriaAberta === categoria.id ? '▾' : '▸'}
               </button>
               {categoriaAberta === categoria.id &&
                 itensDisponiveis
-                  .filter((item) => item.categoriaId === categoria.id) 
+                  .filter((item) => item.categoriaId === categoria.id)
                   .map((item) => (
                     <div key={item.id} className="comanda-card-img">
                       <img src={item.image || 'https://via.placeholder.com/50'} alt={item.name} className="comanda-img" />

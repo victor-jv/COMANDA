@@ -7,22 +7,27 @@ function ResumoPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  if (!state) return <p>Dados da comanda não encontrados.</p>;
+  if (!state) {
+    // Redireciona para home se não houver estado (acesso direto à URL)
+    navigate('/home');
+    return null;
+  }
 
-  // ✅ Extrai numero_sequencial do state da navegação
-  const { numero, nome, pedido, total, dataAbertura, numero_sequencial } = state;
+  const { numero, nome, pedido, total, dataAbertura, numero_sequencial, garcom } = state;
 
   const finalizarComanda = async () => {
     try {
-      // ✅ Salva o total e a dataAbertura (o backend espera o ID longo para o PUT)
       await axios.put(`https://backendcmd.onrender.com/comandas/${numero}`, {
         status: 'fechada',
         total: total,
         dataAbertura: dataAbertura,
+        // Você pode opcionalmente salvar o nome do garçom na comanda finalizada
+        garcom: garcom, 
       });
       navigate('/home');
     } catch (error) {
       console.error('Erro ao finalizar comanda:', error);
+      // Adicionar feedback de erro para o usuário aqui se desejar
     }
   };
 
@@ -36,8 +41,8 @@ function ResumoPage() {
       <h3 className="resumo-subtitle">RESUMO DA MESA</h3>
 
       <div className="resumo-box">
-        {/* ✅ Exibe "Comanda" e o numero_sequencial formatado */}
-        <p><strong>Comanda:</strong> {String(numero_sequencial || 'ERR').padStart(2, '0')}</p>
+        <p><strong>Comanda:</strong> {String(numero_sequencial || numero).padStart(2, '0')}</p>
+        <p><strong>Cliente:</strong> {nome}</p>
         <p><strong>Status:</strong> Fechada</p>
         <p><strong>Data de Abertura:</strong> {new Date(dataAbertura).toLocaleDateString('pt-BR', {
             year: 'numeric',
@@ -48,6 +53,7 @@ function ResumoPage() {
             second: '2-digit',
             timeZone: 'America/Sao_Paulo'
           })}</p>
+        <p><strong>Garçom:</strong> {garcom}</p>
       </div>
 
       <table className="resumo-tabela">

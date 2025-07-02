@@ -62,7 +62,7 @@ function App() {
           <Route path="/" element={!currentUser ? <LoginPage onLoginSuccess={handleLogin} /> : <Navigate to="/home" />} />
           
           <Route path="/home" element={<ProtectedRoute user={currentUser}><HomePage setNotificationMessage={setNotificationMessage} /></ProtectedRoute>} />
-          <Route path="/comanda/:numero" element={<ProtectedRoute user={currentUser}><ComandaPage /></ProtectedRoute>} />
+          <Route path="/comanda/:numero" element={<ProtectedRoute user={currentUser}><ComandaPage user={currentUser} /></ProtectedRoute>} />
           <Route path="/resumo" element={<ProtectedRoute user={currentUser}><ResumoPage /></ProtectedRoute>} />
 
           {/* Rotas de Admin */}
