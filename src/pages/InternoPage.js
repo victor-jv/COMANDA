@@ -24,114 +24,99 @@ function InternoPage() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [editingIndex, setEditingIndex] = useState(null);
   const [editingId, setEditingId] = useState(null);
-
   const [isLoading, setIsLoading] = useState(false);
 
   const tabs = ['Categorias', 'Itens', 'Garçons'];
 
   useEffect(() => {
-    const index = tabs.indexOf(activeTab);
-    setLinePosition(index);
+    setLinePosition(tabs.indexOf(activeTab));
     fetchData();
   }, [activeTab]);
 
   const fetchData = async () => {
     try {
       if (activeTab === 'Categorias') {
-        const response = await axios.get('https://backendcmd.onrender.com/categorias');
-        setCategories(response.data);
+        const res = await axios.get('http://localhost:5000/categorias');
+        setCategories(res.data);
       }
       if (activeTab === 'Itens') {
-        const response = await axios.get('https://backendcmd.onrender.com/itens');
-        setItens(response.data);
-        const catRes = await axios.get('https://backendcmd.onrender.com/categorias');
-        setCategories(catRes.data);
+        const [resItens, resCats] = await Promise.all([
+          axios.get('http://localhost:5000/itens'),
+          axios.get('http://localhost:5000/categorias')
+        ]);
+        setItens(resItens.data);
+        setCategories(resCats.data);
       }
       if (activeTab === 'Garçons') {
-        const response = await axios.get('https://backendcmd.onrender.com/garcons');
-        setGarcons(response.data);
+        const res = await axios.get('http://localhost:5000/garcons');
+        setGarcons(res.data);
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       toast.error('Erro ao carregar dados');
     }
   };
 
   const handlePriceChange = (e) => {
     let value = e.target.value.replace(/\D/g, '').replace(/^0+/, '');
-    if (!value) {
-      setNewPrice('');
-      return;
-    }
-    if (value.length === 1) value = '0,0' + value;
-    else if (value.length === 2) value = '0,' + value;
-    else value = value.slice(0, -2) + ',' + value.slice(-2);
+    if (!value) return setNewPrice('');
+    value = value.length === 1 ? '0,0' + value : value.length === 2 ? '0,' + value : value.slice(0, -2) + ',' + value.slice(-2);
     setNewPrice(value);
   };
 
   const handleAddOrEdit = async () => {
-  if (activeTab === 'Categorias' && newItem.trim() === '') {
-  toast.error('❌ Nome da categoria é obrigatório!');
-  return;
-}
-if (activeTab === 'Itens' && (
-  newItem.trim() === '' ||
-  newPrice.trim() === '' ||
-  (!selectedFile && !newImage) ||
-  !selectedCategory
-)) {
-  toast.error('❌ Preencha todos os campos do item!');
-  return;
-}
-if (activeTab === 'Garçons' && newItem.trim() === '') {
-  toast.error('❌ Nome do garçom é obrigatório!');
-  return;
-}
+    if (
+      (activeTab === 'Categorias' || activeTab === 'Garçons') &&
+      newItem.trim() === ''
+    ) {
+      toast.error('❌ Nome é obrigatório!');
+      return;
+    }
+    if (
+      activeTab === 'Itens' &&
+      (newItem.trim() === '' || newPrice.trim() === '' || (!selectedFile && !newImage) || !selectedCategory)
+    ) {
+      toast.error('❌ Preencha todos os campos do item!');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       if (activeTab === 'Categorias') {
-        if (editingId) {
-          await axios.put(`https://backendcmd.onrender.com/categorias/${editingId}`, { name: newItem });
-        } else {
-          await axios.post('https://backendcmd.onrender.com/categorias', { name: newItem });
-        }
+        editingId
+          ? await axios.put(`http://localhost:5000/categorias/${editingId}`, { name: newItem })
+          : await axios.post('http://localhost:5000/categorias', { name: newItem });
       }
 
       if (activeTab === 'Itens') {
-        const formData = new FormData();
-        formData.append('name', newItem);
-        formData.append('price', newPrice);
-        formData.append('categoriaId', selectedCategory);
         if (selectedFile) {
+          const formData = new FormData();
+          formData.append('name', newItem);
+          formData.append('price', newPrice.replace(',', '.'));
+          formData.append('categoriaId', selectedCategory);
           formData.append('image', selectedFile);
-        }
 
-        if (editingId) {
-          if (selectedFile) {
-            await axios.put(`https://backendcmd.onrender.com/itens/${editingId}`, formData, {
-              headers: { 'Content-Type': 'multipart/form-data' },
-            });
-          } else {
-            await axios.put(`https://backendcmd.onrender.com/itens/${editingId}`, {
-              name: newItem,
-              price: newPrice,
-              categoriaId: selectedCategory
-            });
-          }
-        } else {
-          await axios.post('https://backendcmd.onrender.com/itens', formData, {
+          await axios({
+            method: editingId ? 'put' : 'post',
+            url: `http://localhost:5000/itens${editingId ? `/${editingId}` : ''}`,
+            data: formData,
             headers: { 'Content-Type': 'multipart/form-data' },
           });
+        } else {
+          const body = {
+            name: newItem,
+            price: newPrice.replace(',', '.'),
+            categoriaId: selectedCategory,
+          };
+          await axios.put(`http://localhost:5000/itens/${editingId}`, body);
         }
       }
 
       if (activeTab === 'Garçons') {
-        if (editingId) {
-          await axios.put(`https://backendcmd.onrender.com/garcons/${editingId}`, { nome: newItem });
-        } else {
-          await axios.post('https://backendcmd.onrender.com/garcons', { nome: newItem });
-        }
+        editingId
+          ? await axios.put(`http://localhost:5000/garcons/${editingId}`, { nome: newItem })
+          : await axios.post('http://localhost:5000/garcons', { nome: newItem });
       }
 
       toast.success('✅ Salvo com sucesso!');
@@ -144,8 +129,8 @@ if (activeTab === 'Garçons' && newItem.trim() === '') {
       setEditingIndex(null);
       setModalOpen(false);
       fetchData();
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
       toast.error('Erro ao salvar');
     }
 
@@ -158,48 +143,47 @@ if (activeTab === 'Garçons' && newItem.trim() === '') {
   };
 
   const handleConfirmDelete = async () => {
-    if (indexToDelete !== null) {
-      try {
-        if (activeTab === 'Categorias') {
-          const id = categories[indexToDelete].id;
-          await axios.delete(`https://backendcmd.onrender.com/categorias/${id}`);
-        }
-        if (activeTab === 'Itens') {
-          const id = itens[indexToDelete].id;
-          await axios.delete(`https://backendcmd.onrender.com/itens/${id}`);
-        }
-        if (activeTab === 'Garçons') {
-          const id = garcons[indexToDelete].id;
-          await axios.delete(`https://backendcmd.onrender.com/garcons/${id}`);
-        }
-        toast.success('🗑️ Excluído com sucesso!');
-        fetchData();
-      } catch (error) {
-        console.error(error);
-        toast.error('Erro ao excluir');
-      }
-      setConfirmDeleteOpen(false);
-      setIndexToDelete(null);
+    if (indexToDelete === null) return;
+
+    try {
+      const entity = activeTab === 'Categorias' ? categories :
+                     activeTab === 'Itens' ? itens :
+                     garcons;
+      const id = entity[indexToDelete].id;
+      const endpoint = activeTab === 'Garçons' ? 'garcons' : activeTab.toLowerCase();
+await axios.delete(`http://localhost:5000/${endpoint}/${id}`);
+      toast.success('🗑️ Excluído com sucesso!');
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      toast.error('Erro ao excluir');
     }
+    setConfirmDeleteOpen(false);
+    setIndexToDelete(null);
   };
 
   const handleEditItem = (index) => {
+    setEditingIndex(index);
+
     if (activeTab === 'Categorias') {
       setNewItem(categories[index].name);
       setEditingId(categories[index].id);
     }
+
     if (activeTab === 'Itens') {
-      setNewItem(itens[index].name);
-      setNewPrice(itens[index].price);
-      setNewImage(itens[index].image);
-      setSelectedCategory(itens[index].categoriaId || '');
-      setEditingId(itens[index].id);
+      const item = itens[index];
+      setNewItem(item.name);
+      setNewPrice(item.price);
+      setNewImage(item.image_url || '');
+      setSelectedCategory(item.categoria_id);
+      setEditingId(item.id);
     }
+
     if (activeTab === 'Garçons') {
       setNewItem(garcons[index].nome);
       setEditingId(garcons[index].id);
     }
-    setEditingIndex(index);
+
     setModalOpen(true);
   };
 
@@ -218,11 +202,7 @@ if (activeTab === 'Garçons' && newItem.trim() === '') {
     <div className="home-container">
       <div className="navigation-tabs">
         {tabs.map((tab, index) => (
-          <button
-            key={tab}
-            className={`tab ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
+          <button key={tab} className={`tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
             {tab}
           </button>
         ))}
@@ -233,20 +213,14 @@ if (activeTab === 'Garçons' && newItem.trim() === '') {
         {activeTab === 'Categorias' && (
           <div className="list-categories">
             {categories.length === 0 ? (
-              <div className="empty-wrapper">
-                <p className="empty-message">Nenhuma categoria cadastrada</p>
-              </div>
+              <p className="empty-message">Nenhuma categoria cadastrada</p>
             ) : (
-              categories.map((category, index) => (
+              categories.map((cat, index) => (
                 <div key={index} className="category-item">
-                  <span className="category-name">{category.name}</span>
+                  <span className="category-name">{cat.name}</span>
                   <div className="category-actions">
-                    <button className="icon-button" onClick={() => handleEditItem(index)}>
-                      <img src={editIcon} alt="Editar" />
-                    </button>
-                    <button className="icon-button" onClick={() => askDeleteItem(index)}>
-                      <img src={trashIcon} alt="Excluir" />
-                    </button>
+                    <button className="icon-button" onClick={() => handleEditItem(index)}><img src={editIcon} alt="edit" /></button>
+                    <button className="icon-button" onClick={() => askDeleteItem(index)}><img src={trashIcon} alt="delete" /></button>
                   </div>
                 </div>
               ))
@@ -257,24 +231,18 @@ if (activeTab === 'Garçons' && newItem.trim() === '') {
         {activeTab === 'Itens' && (
           <div className="list-categories">
             {itens.length === 0 ? (
-              <div className="empty-wrapper">
-                <p className="empty-message">Nenhum item cadastrado</p>
-              </div>
+              <p className="empty-message">Nenhum item cadastrado</p>
             ) : (
               itens.map((item, index) => (
                 <div key={index} className="item-box">
-                  <img src={item.image || 'https://via.placeholder.com/130'} alt="Item" className="item-image" />
+                  <img src={item.image_url || 'https://via.placeholder.com/130'} alt="item" className="item-image" />
                   <div className="item-details">
                     <span className="item-name">{item.name}</span>
                     <span className="item-price">R$ {item.price}</span>
                   </div>
                   <div className="item-actions">
-                    <button className="icon-button edit" onClick={() => handleEditItem(index)}>
-                      <img src={editIcon} alt="Editar" />
-                    </button>
-                    <button className="icon-button delete" onClick={() => askDeleteItem(index)}>
-                      <img src={trashIcon} alt="Excluir" />
-                    </button>
+                    <button className="icon-button edit" onClick={() => handleEditItem(index)}><img src={editIcon} alt="edit" /></button>
+                    <button className="icon-button delete" onClick={() => askDeleteItem(index)}><img src={trashIcon} alt="delete" /></button>
                   </div>
                 </div>
               ))
@@ -285,20 +253,14 @@ if (activeTab === 'Garçons' && newItem.trim() === '') {
         {activeTab === 'Garçons' && (
           <div className="list-categories">
             {garcons.length === 0 ? (
-              <div className="empty-wrapper">
-                <p className="empty-message">Nenhum garçom cadastrado</p>
-              </div>
+              <p className="empty-message">Nenhum garçom cadastrado</p>
             ) : (
               garcons.map((garcom, index) => (
                 <div key={index} className="category-item">
                   <span className="category-name">{garcom.nome}</span>
                   <div className="category-actions">
-                    <button className="icon-button" onClick={() => handleEditItem(index)}>
-                      <img src={editIcon} alt="Editar" />
-                    </button>
-                    <button className="icon-button" onClick={() => askDeleteItem(index)}>
-                      <img src={trashIcon} alt="Excluir" />
-                    </button>
+                    <button className="icon-button" onClick={() => handleEditItem(index)}><img src={editIcon} alt="edit" /></button>
+                    <button className="icon-button" onClick={() => askDeleteItem(index)}><img src={trashIcon} alt="delete" /></button>
                   </div>
                 </div>
               ))
@@ -314,55 +276,26 @@ if (activeTab === 'Garçons' && newItem.trim() === '') {
           <div className="modal-content">
             <button className="close-modal" onClick={toggleModal}>✖</button>
             <h3>{editingIndex !== null ? 'Editar' : 'Adicionar'} {activeTab.slice(0, -1)}</h3>
-            <input
-              type="text"
-              className="input-modal"
-              placeholder="Digite o nome"
-              value={newItem}
-              onChange={(e) => setNewItem(e.target.value)}
-            />
+            <input type="text" className="input-modal" placeholder="Digite o nome" value={newItem} onChange={(e) => setNewItem(e.target.value)} />
             {activeTab === 'Itens' && (
               <>
-                <input
-                  type="text"
-                  className="input-modal"
-                  placeholder="Digite o preço"
-                  value={newPrice}
-                  onChange={handlePriceChange}
-                />
-                <select
-                  className="input-modal"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                >
+                <input type="text" className="input-modal" placeholder="Digite o preço" value={newPrice} onChange={handlePriceChange} />
+                <select className="input-modal" value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
                   <option value="">Selecione uma categoria</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
                 <div className="image-upload">
-                  <label htmlFor="fileInput" className="image-upload-label">
-                    Escolher Imagem
-                  </label>
-                  <input
-                    id="fileInput"
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      if (file) {
-                        const imageURL = URL.createObjectURL(file);
-                        setNewImage(imageURL);
-                        setSelectedFile(file);
-                      }
-                    }}
-                  />
-                  {newImage && (
-                    <div className="image-preview">
-                      <img src={newImage} alt="Preview" />
-                    </div>
-                  )}
+                  <label htmlFor="fileInput" className="image-upload-label">Escolher Imagem</label>
+                  <input id="fileInput" type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      setNewImage(URL.createObjectURL(file));
+                      setSelectedFile(file);
+                    }
+                  }} />
+                  {newImage && <div className="image-preview"><img src={newImage} alt="preview" /></div>}
                 </div>
               </>
             )}

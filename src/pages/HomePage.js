@@ -22,17 +22,22 @@ function HomePage({ setNotificationMessage }) {
     const index = tabs.indexOf(activeTab);
     setLinePosition(index);
 
-    const interval = setInterval(() => {
-      if (activeTab === 'Cardápio') carregarItensECategorias();
-      else carregarComandas();
-    }, 2000);
+    const fetchData = () => {
+      if (activeTab === 'Cardápio') {
+        carregarItensECategorias();
+      } else {
+        carregarComandas();
+      }
+    };
 
+    fetchData();
+    const interval = setInterval(fetchData, 3000);
     return () => clearInterval(interval);
   }, [activeTab]);
 
   const carregarComandas = async () => {
     try {
-      const res = await axios.get('https://backendcmd.onrender.com/comandas');
+      const res = await axios.get('http://localhost:5000/comandas');
       setComandas(res.data);
     } catch (err) {
       console.error('Erro ao carregar comandas:', err);
@@ -42,8 +47,8 @@ function HomePage({ setNotificationMessage }) {
   const carregarItensECategorias = async () => {
     try {
       const [resItens, resCategorias] = await Promise.all([
-        axios.get('https://backendcmd.onrender.com/itens'),
-        axios.get('https://backendcmd.onrender.com/categorias'),
+        axios.get('http://localhost:5000/itens'),
+        axios.get('http://localhost:5000/categorias'),
       ]);
       setItens(resItens.data);
       setCategorias(resCategorias.data);
@@ -57,25 +62,24 @@ function HomePage({ setNotificationMessage }) {
 
     const comandaData = {
       nome: novoNome,
-      numero: Date.now().toString(),
       status: 'aberta',
-      createdAt: new Date().toISOString(),
-      itens: [],
     };
 
     try {
-      await axios.post('https://backendcmd.onrender.com/comandas', comandaData);
+      await axios.post('http://localhost:5000/comandas', comandaData);
       setModalOpen(false);
       setNewNome('');
-      setNotificationMessage(`✅ Comanda ${comandaData.nome} criada com sucesso!`);
+      carregarComandas();
+      setNotificationMessage(`✅ Comanda para ${comandaData.nome} criada com sucesso!`);
     } catch (err) {
-      console.error('Erro ao salvar no Firebase:', err);
+      console.error('Erro ao salvar comanda:', err);
     }
   };
 
-  const excluirComanda = async (numero) => {
+  const excluirComanda = async (id) => {
     try {
-      await axios.delete(`https://backendcmd.onrender.com/comandas/${numero}`);
+      await axios.delete(`http://localhost:5000/comandas/${id}`);
+      carregarComandas();
     } catch (err) {
       console.error('Erro ao excluir comanda:', err);
     }
@@ -87,9 +91,10 @@ function HomePage({ setNotificationMessage }) {
     try {
       await Promise.all(
         finalizadas.map((c) =>
-          axios.delete(`https://backendcmd.onrender.com/comandas/${c.numero}`)
+          axios.delete(`http://localhost:5000/comandas/${c.id}`)
         )
       );
+      carregarComandas();
     } catch (err) {
       console.error('Erro ao excluir todas as finalizadas:', err);
     }
@@ -103,13 +108,13 @@ function HomePage({ setNotificationMessage }) {
   const renderComandaBox = (comanda, index, colorClass = '') => (
     <div
       className={`comanda-box-fixed ${colorClass}`}
-      onClick={() => navigate(`/comanda/${comanda.numero}`)}
+      onClick={() => navigate(`/comanda/${comanda.id}`)}
     >
       <button
         className="delete-comanda"
         onClick={(e) => {
           e.stopPropagation();
-          setConfirmDeleteSingle(comanda.numero);
+          setConfirmDeleteSingle(comanda.id);
         }}
       >
         ✖
@@ -146,7 +151,7 @@ function HomePage({ setNotificationMessage }) {
             {comandas
               .filter((c) => c.status === 'aberta' && c.itens && c.itens.length > 0)
               .map((comanda, index) => (
-                <div key={comanda.numero}>
+                <div key={comanda.id}>
                   {renderComandaBox(comanda, index, 'comanda-verde')}
                 </div>
               ))}
@@ -158,7 +163,7 @@ function HomePage({ setNotificationMessage }) {
             {comandas
               .filter((c) => c.status === 'aberta' && (!c.itens || c.itens.length === 0))
               .map((comanda, index) => (
-                <div key={comanda.numero}>
+                <div key={comanda.id}>
                   {renderComandaBox(comanda, index, 'comanda-amarela')}
                 </div>
               ))}
@@ -180,7 +185,7 @@ function HomePage({ setNotificationMessage }) {
               {comandas
                 .filter((c) => c.status === 'fechada')
                 .map((comanda, index) => (
-                  <div key={comanda.numero}>
+                  <div key={comanda.id}>
                     {renderComandaBox(comanda, index, 'comanda-vermelha')}
                   </div>
                 ))}
@@ -198,10 +203,10 @@ function HomePage({ setNotificationMessage }) {
                 <div className={`item-list ${categoriaAberta === cat.id ? '' : 'hidden'}`}>
                   {categoriaAberta === cat.id &&
                     itens
-                      .filter((item) => item.categoriaId === cat.id)
+                      .filter((item) => item.categoria_id === cat.id)
                       .map((item) => (
                         <div key={item.id} className="item-box">
-                          <img src={item.image} alt={item.name} className="item-image" />
+                          <img src={item.image_url || 'https://via.placeholder.com/100'} alt={item.name} className="item-image" />
                           <div className="item-details">
                             <span className="item-name">{item.name}</span>
                             <span className="item-price">R$ {item.price}</span>

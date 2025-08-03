@@ -1,65 +1,60 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api'; // ⬅️ subindo uma pasta
 import './ComandaPage.css';
 
-// A função agora recebe a prop 'user' que contém os dados do garçom logado.
 function ComandaPage({ user }) {
-  const { numero } = useParams(); // 'numero' é o ID da comanda.
+  const { numero: id } = useParams();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('Pedidos da comanda');
-  const [nomeCliente, setNomeCliente] = useState(''); // Estado para o nome do cliente.
+  const [nomeCliente, setNomeCliente] = useState('');
   const [itensDisponiveis, setItensDisponiveis] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [categoriaAberta, setCategoriaAberta] = useState(null);
   const [pedido, setPedido] = useState({});
-  const [comandaSequencial, setComandaSequencial] = useState(''); // Estado para o número de exibição.
   const tabs = ['Pedidos da comanda', 'Cardápio'];
 
-  useEffect(() => {
-    carregarDados();
-    // Atualiza os dados da comanda a cada 2 segundos para manter a sincronia.
-    const intervalo = setInterval(carregarDados, 2000);
-    return () => clearInterval(intervalo);
-  }, [numero]);
-
-  const carregarDados = async () => {
+  const carregarDados = useCallback(async () => {
     try {
-      const [itensRes, categoriasRes, comandasRes] = await Promise.all([
-        axios.get('https://backendcmd.onrender.com/itens'),
-        axios.get('https://backendcmd.onrender.com/categorias'),
-        axios.get('https://backendcmd.onrender.com/comandas'),
+      const [itensRes, categoriasRes, comandaRes] = await Promise.all([
+        api.get('/itens'),
+        api.get('/categorias'),
+        api.get(`/comandas/${id}`)
       ]);
 
       setItensDisponiveis(itensRes.data);
       setCategorias(categoriasRes.data);
 
-      const comanda = comandasRes.data.find((c) => c.numero === numero);
+      const comanda = comandaRes.data;
       if (comanda) {
-        setNomeCliente(comanda.nome); // Define o nome do cliente.
-        setComandaSequencial(comanda.numero); // Define o ID para exibição.
+        setNomeCliente(comanda.nome);
+
         const pedidoConvertido = {};
         (comanda.itens || []).forEach((item) => {
           pedidoConvertido[item.id] = item.qtd;
         });
         setPedido(pedidoConvertido);
       } else {
-        // Se a comanda não for encontrada, redireciona para a página inicial.
-        console.warn(`Comanda com ID '${numero}' não encontrada. Redirecionando para /home.`);
+        console.warn(`Comanda com ID '${id}' não encontrada.`);
         navigate('/home');
       }
     } catch (err) {
       console.error('Erro ao carregar dados:', err);
-      // Redireciona em caso de erro de rede para evitar uma tela em branco.
       navigate('/home');
     }
-  };
+  }, [id, navigate]);
+
+  useEffect(() => {
+    carregarDados();
+    const intervalo = setInterval(carregarDados, 5000);
+    return () => clearInterval(intervalo);
+  }, [id, carregarDados]);
 
   const alterarQtd = (itemId, delta) => {
     setPedido((prev) => {
       const atual = prev[itemId] || 0;
-      const novo = Math.max(atual + delta, 0); // Garante que a quantidade não seja negativa.
+      const novo = Math.max(atual + delta, 0);
       const atualizado = { ...prev };
 
       if (novo === 0) {
@@ -68,48 +63,45 @@ function ComandaPage({ user }) {
         atualizado[itemId] = novo;
       }
 
-      // Prepara os dados para serem enviados ao backend.
-      const pedidoFirebase = Object.entries(atualizado).map(([id, qtd]) => {
-        const item = itensDisponiveis.find((i) => i.id === id);
-        return { id, name: item?.name || '', qtd };
+      const pedidoFormatado = Object.entries(atualizado).map(([itemId, qtd]) => {
+        const item = itensDisponiveis.find((i) => i.id === itemId);
+        return {
+          id: itemId,
+          name: item?.name || '',
+          price: item?.price || 0,
+          qtd
+        };
       });
 
-      // Atualiza os itens da comanda no backend.
-      axios
-        .put(`https://backendcmd.onrender.com/comandas/${numero}/itens`, {
-          itens: pedidoFirebase,
-        })
+      api
+        .put(`/comandas/${id}/itens`, { itens: pedidoFormatado })
         .catch((err) => console.error('Erro ao salvar itens da comanda:', err));
 
       return atualizado;
     });
   };
 
-  // Calcula o valor total do pedido.
   const total = Object.entries(pedido).reduce((acc, [id, qtd]) => {
     const item = itensDisponiveis.find((i) => i.id === id);
     if (!item) return acc;
-    // Converte o preço para número, substituindo vírgula por ponto.
     const price = parseFloat(String(item.price).replace(',', '.'));
     return acc + qtd * price;
   }, 0);
 
-  // Navega para a página de resumo, enviando os dados necessários.
   const finalizarPedido = () => {
     const dataAtualUTC = new Date().toISOString();
     const pedidoFinal = Object.entries(pedido).map(([id, qtd]) => {
       const item = itensDisponiveis.find((i) => i.id === id);
-      return { id, name: item?.name, qtd };
+      return { id, name: item?.name, price: item?.price, qtd };
     });
 
     navigate('/resumo', {
       state: {
-        numero: numero,
+        id,
         nome: nomeCliente,
         total,
         dataAbertura: dataAtualUTC,
         pedido: pedidoFinal,
-        // Adiciona o nome do garçom, que veio da prop 'user'.
         garcom: user.nome,
       },
     });
@@ -141,10 +133,7 @@ function ComandaPage({ user }) {
         />
       </div>
 
-      <h3 className="comanda-title">
-        {/* Exibe o número da comanda e o nome do cliente. */}
-        COMANDA {String(comandaSequencial).padStart(2, '0')} — {nomeCliente}
-      </h3>
+      <h3 className="comanda-title">COMANDA — {nomeCliente.toUpperCase()}</h3>
 
       <div className="comanda-content">
         {activeTab === 'Pedidos da comanda' ? (
@@ -153,11 +142,10 @@ function ComandaPage({ user }) {
           ) : (
             Object.entries(pedido).map(([id, qtd]) => {
               const item = itensDisponiveis.find((i) => i.id === id);
-              // Adicionado para evitar erro caso o item seja removido do sistema.
-              if (!item) return null; 
+              if (!item) return null;
               return (
                 <div key={id} className="comanda-card-img">
-                  <img src={item?.image || 'https://via.placeholder.com/50'} alt={item?.name} className="comanda-img" />
+                  <img src={item?.image_url || 'https://via.placeholder.com/50'} alt={item?.name} className="comanda-img" />
                   <div className="comanda-info">
                     <strong>{item?.name}</strong>
                     <span>R$ {item?.price}</span>
@@ -175,17 +163,17 @@ function ComandaPage({ user }) {
           categorias.map((categoria) => (
             <div key={categoria.id}>
               <button
-                className="folder-button" // Esta classe deve existir no seu CSS
+                className="folder-button"
                 onClick={() => setCategoriaAberta(categoriaAberta === categoria.id ? null : categoria.id)}
               >
                 {categoria.name} {categoriaAberta === categoria.id ? '▾' : '▸'}
               </button>
               {categoriaAberta === categoria.id &&
                 itensDisponiveis
-                  .filter((item) => item.categoriaId === categoria.id)
+                  .filter((item) => item.categoria_id === categoria.id)
                   .map((item) => (
                     <div key={item.id} className="comanda-card-img">
-                      <img src={item.image || 'https://via.placeholder.com/50'} alt={item.name} className="comanda-img" />
+                      <img src={item.image_url || 'https://via.placeholder.com/50'} alt={item.name} className="comanda-img" />
                       <div className="comanda-info">
                         <strong>{item.name}</strong>
                         <span>R$ {item.price}</span>
