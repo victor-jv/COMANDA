@@ -37,7 +37,7 @@ function HomePage({ setNotificationMessage }) {
 
   const carregarComandas = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/comandas');
+      const res = await axios.get('https://backendcmd.onrender.com/comandas');
       setComandas(res.data);
     } catch (err) {
       console.error('Erro ao carregar comandas:', err);
@@ -47,8 +47,8 @@ function HomePage({ setNotificationMessage }) {
   const carregarItensECategorias = async () => {
     try {
       const [resItens, resCategorias] = await Promise.all([
-        axios.get('http://localhost:5000/itens'),
-        axios.get('http://localhost:5000/categorias'),
+        axios.get('https://backendcmd.onrender.com/itens'),
+        axios.get('https://backendcmd.onrender.com/categorias'),
       ]);
       setItens(resItens.data);
       setCategorias(resCategorias.data);
@@ -66,7 +66,7 @@ function HomePage({ setNotificationMessage }) {
     };
 
     try {
-      await axios.post('http://localhost:5000/comandas', comandaData);
+      await axios.post('https://backendcmd.onrender.com/comandas', comandaData);
       setModalOpen(false);
       setNewNome('');
       carregarComandas();
@@ -78,7 +78,7 @@ function HomePage({ setNotificationMessage }) {
 
   const excluirComanda = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/comandas/${id}`);
+      await axios.delete(`https://backendcmd.onrender.com/comandas/${id}`);
       carregarComandas();
     } catch (err) {
       console.error('Erro ao excluir comanda:', err);
@@ -91,7 +91,7 @@ function HomePage({ setNotificationMessage }) {
     try {
       await Promise.all(
         finalizadas.map((c) =>
-          axios.delete(`http://localhost:5000/comandas/${c.id}`)
+          axios.delete(`https://backendcmd.onrender.com/comandas/${c.id}`)
         )
       );
       carregarComandas();

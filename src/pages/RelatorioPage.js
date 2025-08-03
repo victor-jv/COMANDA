@@ -29,7 +29,7 @@ function RelatorioPage() {
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get('http://localhost:5000/comandas');
+        const response = await axios.get('https://backendcmd.onrender.com/comandas');
         const fechadas = response.data.filter(c => c.status === 'fechada' && (c.dataAbertura || c.createdAt));
         setComandasFechadas(fechadas);
       } catch (err) {

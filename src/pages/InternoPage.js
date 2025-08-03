@@ -36,19 +36,19 @@ function InternoPage() {
   const fetchData = async () => {
     try {
       if (activeTab === 'Categorias') {
-        const res = await axios.get('http://localhost:5000/categorias');
+        const res = await axios.get('https://backendcmd.onrender.com/categorias');
         setCategories(res.data);
       }
       if (activeTab === 'Itens') {
         const [resItens, resCats] = await Promise.all([
-          axios.get('http://localhost:5000/itens'),
-          axios.get('http://localhost:5000/categorias')
+          axios.get('https://backendcmd.onrender.com/itens'),
+          axios.get('https://backendcmd.onrender.com/categorias')
         ]);
         setItens(resItens.data);
         setCategories(resCats.data);
       }
       if (activeTab === 'Garçons') {
-        const res = await axios.get('http://localhost:5000/garcons');
+        const res = await axios.get('https://backendcmd.onrender.com/garcons');
         setGarcons(res.data);
       }
     } catch (err) {
@@ -85,8 +85,8 @@ function InternoPage() {
     try {
       if (activeTab === 'Categorias') {
         editingId
-          ? await axios.put(`http://localhost:5000/categorias/${editingId}`, { name: newItem })
-          : await axios.post('http://localhost:5000/categorias', { name: newItem });
+          ? await axios.put(`https://backendcmd.onrender.com/categorias/${editingId}`, { name: newItem })
+          : await axios.post('https://backendcmd.onrender.com/categorias', { name: newItem });
       }
 
       if (activeTab === 'Itens') {
@@ -99,7 +99,7 @@ function InternoPage() {
 
           await axios({
             method: editingId ? 'put' : 'post',
-            url: `http://localhost:5000/itens${editingId ? `/${editingId}` : ''}`,
+            url: `https://backendcmd.onrender.com/itens${editingId ? `/${editingId}` : ''}`,
             data: formData,
             headers: { 'Content-Type': 'multipart/form-data' },
           });
@@ -109,14 +109,14 @@ function InternoPage() {
             price: newPrice.replace(',', '.'),
             categoriaId: selectedCategory,
           };
-          await axios.put(`http://localhost:5000/itens/${editingId}`, body);
+          await axios.put(`https://backendcmd.onrender.com/itens/${editingId}`, body);
         }
       }
 
       if (activeTab === 'Garçons') {
         editingId
-          ? await axios.put(`http://localhost:5000/garcons/${editingId}`, { nome: newItem })
-          : await axios.post('http://localhost:5000/garcons', { nome: newItem });
+          ? await axios.put(`https://backendcmd.onrender.com/garcons/${editingId}`, { nome: newItem })
+          : await axios.post('https://backendcmd.onrender.com/garcons', { nome: newItem });
       }
 
       toast.success('✅ Salvo com sucesso!');
@@ -151,7 +151,7 @@ function InternoPage() {
                      garcons;
       const id = entity[indexToDelete].id;
       const endpoint = activeTab === 'Garçons' ? 'garcons' : activeTab.toLowerCase();
-await axios.delete(`http://localhost:5000/${endpoint}/${id}`);
+await axios.delete(`https://backendcmd.onrender.com/${endpoint}/${id}`);
       toast.success('🗑️ Excluído com sucesso!');
       fetchData();
     } catch (err) {
