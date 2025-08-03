@@ -7,27 +7,36 @@ function ResumoPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
 
+  // Se o estado não existir (ex: acesso direto à URL), redireciona para a home
   if (!state) {
-    // Redireciona para home se não houver estado (acesso direto à URL)
-    navigate('/home');
+    // Idealmente, deve ser feito dentro de um useEffect para evitar avisos
+    React.useEffect(() => {
+      navigate('/home');
+    }, [navigate]);
     return null;
   }
 
-  const { numero, nome, pedido, total, dataAbertura, numero_sequencial, garcom } = state;
+  // --- CORREÇÃO PRINCIPAL AQUI ---
+  // Trocamos 'numero' por 'id' para obter o ID real da comanda
+  const { id, nome, pedido, total, dataAbertura, numero_sequencial, garcom } = state;
 
   const finalizarComanda = async () => {
+    // Adicionamos uma verificação para garantir que o ID existe antes de fazer a chamada
+    if (!id) {
+      console.error('ID da comanda é inválido. Não é possível finalizar.');
+      return; // Interrompe a função se não houver ID
+    }
+
     try {
-      await axios.put(`https://backendcmd.onrender.com/comandas/${numero}`, {
-        status: 'fechada',
-        total: total,
-        dataAbertura: dataAbertura,
-        // Você pode opcionalmente salvar o nome do garçom na comanda finalizada
-        garcom: garcom, 
+      // Usamos a variável 'id' na URL da API
+      await axios.put(`https://backendcmd.onrender.com/comandas/${id}`, {
+        status: 'fechada', // Apenas enviamos o status, que é o que a rota espera
       });
       navigate('/home');
     } catch (error) {
       console.error('Erro ao finalizar comanda:', error);
-      // Adicionar feedback de erro para o usuário aqui se desejar
+      // Aqui você pode adicionar um alerta para o usuário, se desejar
+      alert('Não foi possível finalizar a comanda. Tente novamente.');
     }
   };
 
@@ -41,7 +50,8 @@ function ResumoPage() {
       <h3 className="resumo-subtitle">RESUMO DA MESA</h3>
 
       <div className="resumo-box">
-        <p><strong>Comanda:</strong> {String(numero_sequencial || numero).padStart(2, '0')}</p>
+        {/* Usamos o id como fallback caso numero_sequencial não exista */}
+        <p><strong>Comanda:</strong> {String(numero_sequencial || id).padStart(2, '0')}</p>
         <p><strong>Cliente:</strong> {nome}</p>
         <p><strong>Status:</strong> Fechada</p>
         <p><strong>Data de Abertura:</strong> {new Date(dataAbertura).toLocaleDateString('pt-BR', {
